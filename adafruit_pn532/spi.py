@@ -38,6 +38,7 @@ __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_PN532.git"
 
 import time
+import utime
 import adafruit_bus_device.spi_device as spi_device
 from micropython import const
 from adafruit_pn532.adafruit_pn532 import PN532
@@ -80,9 +81,9 @@ class PN532_SPI(PN532):
         """Poll PN532 if status byte is ready, up to `timeout` seconds"""
         status_cmd = bytearray([reverse_bit(_SPI_STATREAD), 0x00])
         status_response = bytearray([0x00, 0x00])
-        timestamp = time.monotonic()
+        timestamp = utime.ticks_us()
         with self._spi as spi:
-            while (time.monotonic() - timestamp) < timeout:
+            while (utime.ticks_us() - timestamp)/1000000.0 < timeout:
                 time.sleep(0.02)   # required
                 spi.write_readinto(status_cmd, status_response) #pylint: disable=no-member
                 if reverse_bit(status_response[1]) == 0x01:  # LSB data is read in MSB
